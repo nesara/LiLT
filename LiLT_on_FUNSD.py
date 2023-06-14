@@ -73,3 +73,6 @@ class CustomDataset(Dataset):
 from transformers import AutoTokenizer
 #FIXME: check with the lilt form loaded in the tokenzer  below
 tokenizer = AutoTokenizer.from_pretrained("nielsr/lilt-xlm-roberta-base")
+
+train_dataset = CustomDataset(dataset["train"], tokenizer)
+eval_dataset = CustomDataset(dataset["test"], tokenizer)
