@@ -124,4 +124,9 @@ batch = next(iter(train_dataloader))
 for k,v in batch.items():
   print(k,v.shape)
 tokenizer.decode(batch["input_ids"][0])
+for id, box, label in zip(batch["input_ids"][0], batch["bbox"][0], batch["labels"][0]):
+  if label.item() != -100:
+    print(tokenizer.decode([id]), box, id2label[label.item()])
+  else:
+    print(tokenizer.decode([id]), box, label.item())
   
