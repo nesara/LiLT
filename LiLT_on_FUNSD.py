@@ -76,3 +76,52 @@ tokenizer = AutoTokenizer.from_pretrained("nielsr/lilt-xlm-roberta-base")
 
 train_dataset = CustomDataset(dataset["train"], tokenizer)
 eval_dataset = CustomDataset(dataset["test"], tokenizer)
+example = train_dataset[0]
+tokenizer.decode(example["input_ids"])
+
+
+
+for k,v in example.items():
+  print(k,len(v))
+  
+
+for word, box, label in zip(dataset["train"][0]["words"], dataset["train"][0]["original_bboxes"], dataset["train"][0]["ner_tags"]):
+  print(word, box, id2label[label])
+  
+
+len(example["input_ids"])
+for id, box, label in zip(example["input_ids"], example["bbox"], example["labels"]):
+  if label != -100:
+    print(tokenizer.decode([id]), box, id2label[label])
+  else:
+    print(tokenizer.decode([id]), box, -100)
+    
+    
+#COMMENT: Defining pytorch Data Loader 
+from torch.utils.data import DataLoader
+
+def collate_fn(features):
+  boxes = [feature["bbox"] for feature in features]
+  labels = [feature["labels"] for feature in features]
+  # use tokenizer to pad input_ids
+  batch = tokenizer.pad(features, padding="max_length", max_length=512)
+
+  sequence_length = torch.tensor(batch["input_ids"]).shape[1]
+  batch["labels"] = [labels_example + [-100] * (sequence_length - len(labels_example)) for labels_example in labels]
+  batch["bbox"] = [boxes_example + [[0, 0, 0, 0]] * (sequence_length - len(boxes_example)) for boxes_example in boxes]
+
+  # convert to PyTorch
+  # batch = {k: torch.tensor(v, dtype=torch.int64) if isinstance(v[0], list) else v for k, v in batch.items()}
+  batch = {k: torch.tensor(v) for k, v in batch.items()}
+
+  return batch
+
+train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True, collate_fn=collate_fn)
+eval_dataloader = DataLoader(eval_dataset, batch_size=2, shuffle=False, collate_fn=collate_fn)
+
+batch = next(iter(train_dataloader))
+
+for k,v in batch.items():
+  print(k,v.shape)
+tokenizer.decode(batch["input_ids"][0])
+  
