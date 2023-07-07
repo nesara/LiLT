@@ -1,4 +1,5 @@
 from datasets import load_dataset
+
 #TODO:
 #COMMENT
 #FIXME:
@@ -15,9 +16,10 @@ dataset["train"].features
 
 # %%
 
-from torch.utils.data import Dataset
-from PIL import Image
 import torch
+from PIL import Image
+from torch.utils.data import Dataset
+
 
 def normalize_bbox(bbox, width, height):
     return [
@@ -71,6 +73,7 @@ class CustomDataset(Dataset):
 
 
 from transformers import AutoTokenizer
+
 #FIXME: check with the lilt form loaded in the tokenzer  below
 tokenizer = AutoTokenizer.from_pretrained("nielsr/lilt-xlm-roberta-base")
 
@@ -99,6 +102,7 @@ for id, box, label in zip(example["input_ids"], example["bbox"], example["labels
     
 #COMMENT: Defining pytorch Data Loader 
 from torch.utils.data import DataLoader
+
 
 def collate_fn(features):
   boxes = [feature["bbox"] for feature in features]
